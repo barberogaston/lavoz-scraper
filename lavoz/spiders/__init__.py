@@ -4,7 +4,7 @@ import scrapy
 
 
 class LavozSpider(scrapy.Spider):
-    name = 'lavoz'
+    name = "lavoz"
     base_url = None
     page = 1
 
@@ -20,7 +20,7 @@ class LavozSpider(scrapy.Spider):
 
         if response.xpath(xpath):
             self.page += 1
-            url = f'{self.base_url}&page={self.page}'
+            url = f"{self.base_url}&page={self.page}"
             yield scrapy.Request(url, callback=self.parse)
 
     def parse_posting(self, response):
@@ -29,11 +29,11 @@ class LavozSpider(scrapy.Spider):
         price = self.get_price(response)
         location = self.get_location(response)
         yield {
-            'link': response.url,
-            'title': title,
-            'description': description,
-            'price': price,
-            'location': location
+            "link": response.url,
+            "title": title,
+            "description": description,
+            "price": price,
+            "location": location,
         }
 
     def get_title(self, response):
@@ -45,15 +45,15 @@ class LavozSpider(scrapy.Spider):
         description = response.xpath(xpath).getall()
         if description == []:
             return None
-        return ' '.join([d.replace('\n', '').strip() for d in description])
+        return " ".join([d.replace("\n", "").strip() for d in description])
 
     def get_price(self, response):
         xpath = '//div[contains(@class, "h2 mt0 main bolder")]/text()'
         price = response.xpath(xpath).get()
         if not price:
             return None
-        price = re.sub('[^0-9]', '', price)
-        if price == '':
+        price = re.sub("[^0-9]", "", price)
+        if price == "":
             return None
         return float(price)
 
@@ -62,8 +62,8 @@ class LavozSpider(scrapy.Spider):
         expenses = response.xpath(xpath).get()
         if not expenses:
             return None
-        expenses = re.sub('[^0-9]', '', expenses)
-        if expenses == '':
+        expenses = re.sub("[^0-9]", "", expenses)
+        if expenses == "":
             return None
         return float(expenses)
 

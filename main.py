@@ -23,57 +23,46 @@ from lavoz.spiders import LavozSpider
 
 
 questions = [
+    {"type": "input", "name": "base_url", "message": "URL base de Clasificados LaVoz:"},
     {
-        'type': 'input',
-        'name': 'base_url',
-        'message': 'URL base de Clasificados LaVoz:'
+        "type": "list",
+        "name": "output_format",
+        "message": "Exportar a:",
+        "choices": [OutputFormats.CSV, OutputFormats.JSON],
     },
     {
-        'type': 'list',
-        'name': 'output_format',
-        'message': 'Exportar a:',
-        'choices': [
-            OutputFormats.CSV,
-            OutputFormats.JSON
-        ]
+        "type": "checkbox",
+        "name": "config",
+        "message": "Configuración:",
+        "choices": [{"name": Configs.DROP_NAN_EXPENSES}],
     },
-    {
-        'type': 'checkbox',
-        'name': 'config',
-        'message': 'Configuración:',
-        'choices': [
-            {
-                'name': Configs.DROP_NAN_EXPENSES
-            }
-        ]
-    }
 ]
 
 
 def postprocess(config: dict) -> pd.DataFrame:
-    data = pd.DataFrame.from_records(
-        json.load(open(OUTPUT_FILE, encoding='utf-8'))
-    )
+    data = pd.DataFrame.from_records(json.load(open(OUTPUT_FILE, encoding="utf-8")))
 
     if Configs.DROP_NAN_EXPENSES in config:
         data = data.pipe(drop_nan_expenses)
 
-    return (data.pipe(drop_nan_prices)
-                .pipe(fill_nan_strings)
-                .pipe(capitalize_location)
-                .pipe(normalize_title)
-                .pipe(add_has_balcony)
-                .pipe(add_has_terrace)
-                .pipe(add_has_garage)
-                .pipe(add_has_garden))
+    return (
+        data.pipe(drop_nan_prices)
+        .pipe(fill_nan_strings)
+        .pipe(capitalize_location)
+        .pipe(normalize_title)
+        .pipe(add_has_balcony)
+        .pipe(add_has_terrace)
+        .pipe(add_has_garage)
+        .pipe(add_has_garden)
+    )
 
 
 def export(data: pd.DataFrame, format: str) -> None:
     if format == OutputFormats.CSV:
-        data.to_csv('alquileres.csv', index=False)
+        data.to_csv("alquileres.csv", index=False)
 
     if format == OutputFormats.JSON:
-        data.to_json('alquileres.json', orient='records')
+        data.to_json("alquileres.json", orient="records")
 
     os.remove(OUTPUT_FILE)
 
@@ -81,16 +70,15 @@ def export(data: pd.DataFrame, format: str) -> None:
 def main():
     answers = prompt(questions)
     spider = LavozSpider
-    spider.base_url = answers['base_url']
+    spider.base_url = answers["base_url"]
     spider.start_urls = [spider.base_url]
-    crawler_settings = {'FEEDS': {OUTPUT_FILE: {'format': 'json',
-                                                'overwrite': True}}}
+    crawler_settings = {"FEEDS": {OUTPUT_FILE: {"format": "json", "overwrite": True}}}
     process = CrawlerProcess(settings=crawler_settings)
     process.crawl(spider)
     process.start()
-    data = postprocess(answers['config'])
-    export(data, answers['output_format'])
+    data = postprocess(answers["config"])
+    export(data, answers["output_format"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
