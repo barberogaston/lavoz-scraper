@@ -1,3 +1,4 @@
+black
 pandas
 pyinquirer
 scipy
