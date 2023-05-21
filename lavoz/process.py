@@ -31,7 +31,7 @@ def drop_nan_expenses(data: pd.DataFrame) -> pd.DataFrame:
     return data.dropna(subset=['expenses'])
 
 
-def drop_duplicates(data: pd.DataFrame) -> pd.DataFrame:
+def drop_duplicate_locations(data: pd.DataFrame) -> pd.DataFrame:
     data = data.copy()
     return data.drop_duplicates('location')
 
@@ -65,8 +65,18 @@ def add_is_studio_apartment(data: pd.DataFrame) -> pd.DataFrame:
 
 def add_has_garage(data: pd.DataFrame) -> pd.DataFrame:
     data = data.copy()
+    keywords = ['cochera', 'cocheras', 'garage', 'garaje']
     data.loc[:, 'has_garage'] = data.apply(has_keywords,
-                                           args=(['cochera', 'cocheras'],),
+                                           args=(keywords,),
+                                           axis=1)
+    return data
+
+
+def add_has_garden(data: pd.DataFrame) -> pd.DataFrame:
+    data = data.copy()
+    keywords = ['jardin', 'jardín', 'jardines']
+    data.loc[:, 'has_garden'] = data.apply(has_keywords,
+                                           args=(keywords,),
                                            axis=1)
     return data
 

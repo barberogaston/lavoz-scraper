@@ -9,14 +9,16 @@ class LavozSpider(scrapy.Spider):
     page = 1
 
     def parse(self, response):
-        xpath = '//div[contains(@class, "col-6 flex flex-wrap content-start sm-col-3 md-col-3 align-top")]/div[contains(@class, "relative")]/a[contains(@class, "text-decoration-none")]/@href'
+        carousel_xpath = "//div[contains(@class, 'super_destacado_carousel')]/following-sibling::div/div/a[contains(@class, 'btn-primary')]/@href"
+        all_postings_xpath = "//a[contains(@target, '_self')]/@href"
+
+        xpath = f"{carousel_xpath}|{all_postings_xpath}"
         posting_urls = response.xpath(xpath).getall()
         yield from response.follow_all(posting_urls, self.parse_posting)
 
         xpath = '//a[contains(@aria-label, "Siguiente") and not(contains(@aria-disabled, "true"))]'
-        next_page = response.xpath(xpath)
 
-        if next_page:
+        if response.xpath(xpath):
             self.page += 1
             url = f'{self.base_url}&page={self.page}'
             yield scrapy.Request(url, callback=self.parse)
@@ -25,17 +27,14 @@ class LavozSpider(scrapy.Spider):
         title = self.get_title(response)
         description = self.get_description(response)
         price = self.get_price(response)
-        expenses = self.get_expenses(response)
         location = self.get_location(response)
-        json = {
+        yield {
             'link': response.url,
             'title': title,
             'description': description,
-            'expenses': expenses,
             'price': price,
             'location': location
         }
-        yield json
 
     def get_title(self, response):
         xpath = '//h1[contains(@class, "h2 m0 mb0 bold line-height-1")]/text()'

@@ -7,11 +7,17 @@ from scrapy.crawler import CrawlerProcess
 
 from lavoz.configs import Configs
 from lavoz.output import OutputFormats
-from lavoz.process import (add_has_balcony, add_has_garage, add_has_terrace,
-                           add_is_studio_apartment, capitalize_location,
-                           drop_duplicates, drop_nan_expenses, drop_nan_prices,
-                           normalize_title, remove_expenses_outliers,
-                           remove_price_outliers, fill_nan_strings)
+from lavoz.process import (
+    add_has_balcony,
+    add_has_garage,
+    add_has_garden,
+    add_has_terrace,
+    capitalize_location,
+    drop_nan_expenses,
+    drop_nan_prices,
+    normalize_title,
+    fill_nan_strings,
+)
 from lavoz.settings import OUTPUT_FILE
 from lavoz.spiders import LavozSpider
 
@@ -53,16 +59,13 @@ def postprocess(config: dict) -> pd.DataFrame:
         data = data.pipe(drop_nan_expenses)
 
     return (data.pipe(drop_nan_prices)
-                .pipe(drop_duplicates)
                 .pipe(fill_nan_strings)
                 .pipe(capitalize_location)
                 .pipe(normalize_title)
                 .pipe(add_has_balcony)
                 .pipe(add_has_terrace)
                 .pipe(add_has_garage)
-                .pipe(add_is_studio_apartment)
-                .pipe(remove_price_outliers)
-                .pipe(remove_expenses_outliers))
+                .pipe(add_has_garden))
 
 
 def export(data: pd.DataFrame, format: str) -> None:
